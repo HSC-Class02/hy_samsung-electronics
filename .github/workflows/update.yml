@@ -50,7 +50,8 @@ jobs:
             echo "No data/dashboard changes."
           else
             git commit -m "Update DART financial data"
-            git push
+            git pull --rebase origin main
+            git push origin main
           fi
 
       - name: Configure GitHub Pages
