@@ -41,7 +41,7 @@ jobs:
       - name: Build dashboard
         run: python scripts/build_dashboard.py
 
-      - name: Commit updated data and dashboard
+      -  name: Commit updated data and dashboard
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -53,7 +53,6 @@ jobs:
             git pull --rebase origin main
             git push origin main
           fi
-
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
