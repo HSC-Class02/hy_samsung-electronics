@@ -141,6 +141,14 @@ def pick_by_id(rows, account_ids, mode="period"):
                 return value
     return None
 
+def resolve_revenue(revenue, gross_profit, cost_of_sales):
+    """Use reported revenue when available; otherwise derive revenue = gross profit + cost of sales."""
+    if revenue is not None:
+        return revenue, "reported_account"
+    if gross_profit is not None and cost_of_sales is not None:
+        return gross_profit + cost_of_sales, "gross_profit_plus_cost_of_sales"
+    return None, "unavailable"
+
 def extract(rows):
     bs=[r for r in rows if r.get("sj_div")=="BS"]
     pl=[r for r in rows if r.get("sj_div") in ("IS","CIS")]
@@ -199,10 +207,14 @@ def extract(rows):
         if out[key+"_ytd"] is None and ids:
             out[key+"_ytd"]=pick_by_id(rows,ids,"ytd")
         if out[key+"_ytd"] is None: out[key+"_ytd"]=out[key]
+    # Revenue must never be matched to 매출원가 (cost of sales). If no revenue row/ID exists,
+    # derive it from gross profit + cost of sales when both reported accounts are available.
+    cogs=pick(pl,[r"^매출원가$"],"period")
+    cytd=pick(pl,[r"^매출원가$"],"ytd")
+    out["revenue"],out["revenue_method"]=resolve_revenue(out.get("revenue"),out.get("gross_profit"),cogs)
+    out["revenue_ytd"],out["revenue_ytd_method"]=resolve_revenue(out.get("revenue_ytd"),out.get("gross_profit_ytd"),cytd)
     # A few issuers present cost of sales but not gross profit.
     if out.get("gross_profit") is None and out.get("revenue") is not None:
-        cogs=pick(pl,[r"^매출원가$"],"period")
-        cytd=pick(pl,[r"^매출원가$"],"ytd")
         out["gross_profit"]=out["revenue"]-cogs if cogs is not None else None
         out["gross_profit_ytd"]=out["revenue_ytd"]-cytd if cytd is not None and out["revenue_ytd"] is not None else out["gross_profit"]
     out["ebitda"]=out["operating_income"]+(out.get("depreciation") or 0)+(out.get("amortization") or 0) if out["operating_income"] is not None else None
@@ -270,6 +282,7 @@ def self_test():
     cogs=[{"account_nm":"매출원가","thstrm_amount":"65","sj_div":"IS"}]
     assert pick(cogs,[r"^매출액",r"^수익\(매출액\)",r"^영업수익",r"^매출(?!원가|총이익|채권|채무)"],"period") is None
     assert pick_by_id([{"account_id":"ifrs-full_Revenue","thstrm_amount":"12"}],["ifrs-full_Revenue"])==12
+    assert resolve_revenue(None,300,2200)==(2500,"gross_profit_plus_cost_of_sales")
     print("fetch_dart self-test PASS")
 
 if __name__=="__main__":
