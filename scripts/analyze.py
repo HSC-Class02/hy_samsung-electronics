@@ -192,7 +192,7 @@ def main():
                  "ticker":primary["ticker"],"stock_code":primary.get("stock_code","005930"),"corp_code":primary["corp_code"],
                  "market":"KOSPI","currency":"KRW"},
       "updated_at":datetime.now(timezone.utc).isoformat(),
-      "data_start_year":2010,
+      "data_start_year":2015,
       "units":{"raw_amount":"KRW","dashboard_amount":"억원","ratio":"%"},
       "annual":annual,"half_year":half,"quarterly":quarterly,"peers":peers,
       "methodology":{
