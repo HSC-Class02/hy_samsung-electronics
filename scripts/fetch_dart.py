@@ -171,7 +171,7 @@ def run():
                 if rows:
                     record=extract(rows)
                     record.update({"company":company["name"],"corp_code":company["corp_code"],"ticker":company["ticker"],
-                                   "year":year,"period":period,"fs_div":fs,"source":"DART OpenDART API"})
+                                   "year":year,"period":period,"fs_div":fs,"rcept_no":rows[0].get("rcept_no"),"source":"DART OpenDART API"})
                     records.append(record)
                 time.sleep(0.05)
     DATA.mkdir(parents=True,exist_ok=True)
