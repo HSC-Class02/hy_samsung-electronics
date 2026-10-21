@@ -16,7 +16,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: samsung-dart-financial-dashboard-v2
+  group: samsung-dart-financial-dashboard-v3
   cancel-in-progress: true
 jobs:
   refresh-data:
