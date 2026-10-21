@@ -1,1 +1,48 @@
-{"primary":{"name":"삼성전자","corp_code":"00126380","ticker":"005930.KS"},"peers":[{"name":"SK하이닉스","corp_code":"00164779","ticker":"000660.KS"},{"name":"LG전자","corp_code":"00401731","ticker":"066570.KS"},{"name":"삼성전기","corp_code":"00126138","ticker":"009150.KS"},{"name":"LG디스플레이","corp_code":"00401730","ticker":"034220.KS"}]}
+{
+  "primary": {
+    "name": "삼성전자",
+    "corp_code": "00126380",
+    "ticker": "005930.KS",
+    "stock_code": "005930",
+    "english_name": "Samsung Electronics Co., Ltd.",
+    "segment": "종합 전자·반도체·모바일"
+  },
+  "peers": [
+    {
+      "name": "SK하이닉스",
+      "corp_code": "00164779",
+      "ticker": "000660.KS",
+      "stock_code": "000660",
+      "segment": "메모리 반도체",
+      "rationale": "DRAM·NAND 등 반도체 사업의 핵심 국내 비교기업",
+      "caveat": "사업 포트폴리오가 메모리 반도체에 집중됨"
+    },
+    {
+      "name": "LG전자",
+      "corp_code": "00401731",
+      "ticker": "066570.KS",
+      "stock_code": "066570",
+      "segment": "가전·전장·전자제품",
+      "rationale": "가전과 전장 등 전자제품 사업 비교",
+      "caveat": "반도체 비중이 낮아 수익성 구조가 다름"
+    },
+    {
+      "name": "삼성전기",
+      "corp_code": "00126138",
+      "ticker": "009150.KS",
+      "stock_code": "009150",
+      "segment": "전자부품·기판·MLCC",
+      "rationale": "IT·전자 생태계의 주요 부품 공급사",
+      "caveat": "부품 제조 중심이라 매출 규모와 자본집약도가 다름"
+    },
+    {
+      "name": "LG디스플레이",
+      "corp_code": "00401730",
+      "ticker": "034220.KS",
+      "stock_code": "034220",
+      "segment": "디스플레이 패널",
+      "rationale": "디스플레이 산업 및 패널 업황 비교",
+      "caveat": "패널 업황과 투자 사이클 영향이 큼"
+    }
+  ]
+}
