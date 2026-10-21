@@ -11,7 +11,7 @@ ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/"data"
 CONFIG=json.loads((ROOT/"config/companies.json").read_text(encoding="utf-8"))
 API="https://opendart.fss.or.kr/api"
-YEAR_START=2010
+YEAR_START=2015
 REPORT_CODES=(("annual","11011"),("half","11012"),("q1","11013"),("q3","11014"))
 FLOW_FIELDS={"revenue","gross_profit","operating_income","pretax_income","net_income","controlling_net_income","interest_expense","depreciation","amortization","cfo","cfi","cff","capex_ppe","capex_intangible"}
 SESSION=requests.Session()
