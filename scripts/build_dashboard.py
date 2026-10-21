@@ -63,7 +63,7 @@ tbody tr:hover td{background:#f5fafb}tbody tr:last-child td{border-bottom:0}
  <div class="eyebrow">OpenDART · Financial Intelligence</div>
  <h1>Samsung Electronics<br>Financial Dashboard</h1>
  <p>삼성전자의 DART 공시 재무정보와 재무비율을 시각적으로 살펴봅니다. 공시 수치와 계산 지표를 구분하고, Annual · Half-year · Quarterly 자료 및 국내 비교기업을 한 화면에서 비교합니다.</p>
- <div class="hero-meta"><span class="pill">KOSPI · 005930</span><span class="pill">2010–present</span><span class="pill">KRW · OpenDART</span><span class="pill" id="latestPeriod">데이터 로딩 중</span></div>
+ <div class="hero-meta"><span class="pill">KOSPI · 005930</span><span class="pill">2015–present</span><span class="pill">KRW · OpenDART</span><span class="pill" id="latestPeriod">데이터 로딩 중</span></div>
  <div class="hero-nav"><a href="https://github.com/HSC-Class02/hy_samsung-electronics">Repository / Source files ↗</a></div>
 </header>
 <div id="statusWarning" class="status"></div>
