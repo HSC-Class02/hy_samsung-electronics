@@ -1,65 +1,96 @@
-name: DART financial data update
-
+name: Samsung Electronics DART Financial Data Update & Deploy
 on:
   schedule:
-    - cron: "0 0 1 * *"
+    - cron: '0 0 1 * *' # 09:00 KST on the 1st day of each month
   workflow_dispatch:
-
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update.yml'
+      - 'config/**'
+      - 'scripts/**'
+      - 'requirements.txt'
+      - 'docs/**'
+      - 'README.md'
+      - 'API_KEY_SETUP.md'
 permissions:
-  contents: write
-  pages: write
-  id-token: write
-
+  contents: read
 concurrency:
-  group: dart-financial-update
+  group: samsung-dart-financial-dashboard
   cancel-in-progress: false
-
 jobs:
-  update-and-deploy:
+  refresh-data:
+    name: Fetch DART, analyze ratios, and rebuild dashboard
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     steps:
-      -name: Checkout
-        uses: actions/checkout@v4
-
+      - name: Checkout
+        uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
-
+          python-version: '3.12'
+          cache: pip
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Fetch DART financial data
+        run: python -m pip install -r requirements.txt
+      - name: Validate Python syntax
+        run: python -m py_compile scripts/fetch_dart.py scripts/analyze.py scripts/build_dashboard.py scripts/validate_project.py
+      - name: Test DART extraction helpers
+        run: python scripts/fetch_dart.py --self-test
+      - name: Test ratio calculations
+        run: python scripts/analyze.py --self-test
+      - name: Fetch annual, half-year, and quarterly DART reports
         env:
-          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          DART_API_KEY: \${{ secrets.DART_API_KEY }}
         run: python scripts/fetch_dart.py
-
-      - name: Calculate financial ratios
+      - name: Calculate financial ratios and derive standalone quarters
         run: python scripts/analyze.py
-
-      - name: Build dashboard
+      - name: Build dashboard and data JSON
         run: python scripts/build_dashboard.py
-
-      -  name: Commit updated data and dashboard
+      - name: Validate dashboard data and JavaScript
+        run: |
+          python scripts/validate_project.py
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("docs/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script>", html, re.I)
+          if not scripts:
+              raise SystemExit("No inline JavaScript found in dashboard.")
+          Path("/tmp/samsung-dashboard.js").write_text(scripts[-1], encoding="utf-8")
+          PY
+          node --check /tmp/samsung-dashboard.js
+      - name: Commit refreshed data and dashboard
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data docs
-          if git diff --cached --quiet; then
-            echo "No data/dashboard changes."
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Samsung Electronics DART financial data"
+            git push origin HEAD:main
           else
-            git commit -m "Update DART financial data"
-            git pull --rebase origin main
-            git push origin main
+            echo "No generated data changes."
           fi
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+  deploy-pages:
+    name: Deploy dashboard even if DART refresh fails
+    needs: refresh-data
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: \${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout dashboard
+        uses: actions/checkout@v6
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
