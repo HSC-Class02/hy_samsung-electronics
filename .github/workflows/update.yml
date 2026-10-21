@@ -17,7 +17,7 @@ permissions:
   contents: read
 concurrency:
   group: samsung-dart-financial-dashboard
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   refresh-data:
     name: Fetch DART, analyze ratios, and rebuild dashboard
