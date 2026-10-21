@@ -155,7 +155,7 @@ function chart(id,type,labels,sets,fmtType){
  const ctx=$(id);if(!ctx)return;
  CHARTS.push(new Chart(ctx,{type,data:{labels,datasets:sets},options:{
   responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-  plugins:{legend:{labels:{usePointStyle:true,boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(fmtType==='pct'?pct(c.raw):trillion(c.raw))}}},
+  plugins:{legend:{labels:{usePointStyle:true,boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(fmtType==='pct'?fmt(c.raw,2)+'%':trillion(c.raw))}}},
   scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#edf1f5'},ticks:{font:{size:10},callback:v=>fmtType==='pct'?v+'%':(v/1e12).toFixed(1)}}}
  }}));
 }
