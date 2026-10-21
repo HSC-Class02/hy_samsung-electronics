@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Collect Samsung Electronics and domestic peer financial statements from OpenDART."""
 from __future__ import annotations
-import json, os, re, sys, time, math
+import io, json, os, re, sys, time, math, zipfile
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 import requests
@@ -76,6 +77,51 @@ def get_json(endpoint, params):
     if status=="020":
         raise DartAPIError(f"OpenDART daily/request limit reached ({status}): {message}. Retry on a later run.")
     raise DartAPIError(f"OpenDART API error ({status}): {message}")
+
+def parse_corp_directory(xml_bytes):
+    """Return stock_code -> (corp_code, official name) from OpenDART's corpCode.xml."""
+    root=ET.fromstring(xml_bytes)
+    by_stock={}
+    for row in root.findall(".//list"):
+        stock=(row.findtext("stock_code") or "").strip()
+        code=(row.findtext("corp_code") or "").strip()
+        name=(row.findtext("corp_name") or "").strip()
+        if stock and code:
+            by_stock[stock]=(code,name)
+    return by_stock
+
+def resolve_corp_codes(companies):
+    """Resolve current OpenDART legal codes by each listed firm's six-digit stock code."""
+    try:
+        response=SESSION.get(f"{API}/corpCode.xml",params={"crtfc_key":KEY},timeout=120)
+        response.raise_for_status()
+        archive_bytes=response.content
+        if not zipfile.is_zipfile(io.BytesIO(archive_bytes)):
+            try:
+                error_xml=ET.fromstring(archive_bytes)
+                detail=f" OpenDART status={error_xml.findtext('status')}; message={error_xml.findtext('message')}"
+            except Exception:
+                detail=f" Response excerpt: {response.text[:180].replace(chr(10),' ')}"
+            raise DartAPIError("OpenDART corporate-code directory is not a ZIP. Check API authentication and availability."+detail)
+        with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+            member=next((name for name in archive.namelist() if name.lower().endswith("corpcode.xml")),archive.namelist()[0])
+            by_stock=parse_corp_directory(archive.read(member))
+    except DartAPIError:
+        raise
+    except Exception as exc:
+        raise DartAPIError(f"Unable to download OpenDART corporate-code directory: {exc}") from exc
+    for company in companies:
+        stock=(company.get("stock_code") or company.get("ticker","").split(".")[0]).strip()
+        match=by_stock.get(stock)
+        if not match:
+            print(f"WARNING: no OpenDART code match for {company['name']} / stock code {stock}; using configured code.")
+            continue
+        code,official_name=match
+        old=company.get("corp_code")
+        if old!=code:
+            print(f"Resolved DART code for {company['name']} ({stock}): {old} -> {code} [{official_name}]")
+        company["corp_code"]=code
+    return companies
 
 def fetch_report(corp_code, year, report_code):
     base={"crtfc_key":KEY,"corp_code":corp_code,"bsns_year":str(year),"reprt_code":report_code}
@@ -154,7 +200,8 @@ def run():
         print(f"WARNING: DART_API_KEY has length {len(KEY)}; OpenDART keys are commonly 40 characters. The actual API response will determine whether this key is valid.")
     records=[]
     year_max=datetime.now().year
-    companies=[CONFIG["primary"]]+CONFIG["peers"]
+    companies=[dict(CONFIG["primary"]),*map(dict,CONFIG["peers"])]
+    companies=resolve_corp_codes(companies)
     primary_name=CONFIG["primary"]["name"]
     for company in companies:
         print(f"Collecting {company['name']} ({company['ticker']})")
@@ -188,6 +235,8 @@ def self_test():
     assert amount("(1,234)") == -1234
     assert amount("-") is None
     assert normalize(" 매출액 (손실) ")=="매출액손실"
+    xml=b'<result><list><corp_code>00126371</corp_code><corp_name>Samsung Electro-Mechanics</corp_name><stock_code>009150</stock_code></list></result>'
+    assert parse_corp_directory(xml)["009150"][0]=="00126371"
     test=[{"account_nm":"매출액","thstrm_amount":"100","thstrm_add_amount":"300","sj_div":"IS"}]
     assert pick(test,[r"^매출액$"],"period")==100
     assert pick(test,[r"^매출액$"],"ytd")==300
