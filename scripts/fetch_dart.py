@@ -151,7 +151,7 @@ def run():
     if not KEY:
         raise DartAPIError("DART_API_KEY repository secret is not set. Add it under Settings → Secrets and variables → Actions.")
     if len(KEY)!=40:
-        raise DartAPIError(f"DART_API_KEY should be the 40-character OpenDART key; received length {len(KEY)}. The key itself is never printed.")
+        print(f"WARNING: DART_API_KEY has length {len(KEY)}; OpenDART keys are commonly 40 characters. The actual API response will determine whether this key is valid.")
     records=[]
     year_max=datetime.now().year
     companies=[CONFIG["primary"]]+CONFIG["peers"]
