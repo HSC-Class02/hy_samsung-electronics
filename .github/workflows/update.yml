@@ -10,7 +10,7 @@ on:
       - 'config/**'
       - 'scripts/**'
       - 'requirements.txt'
-      - 'docs/**'
+      - 'docs/index.html'
       - 'README.md'
       - 'API_KEY_SETUP.md'
 permissions:
@@ -82,8 +82,11 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - name: Checkout dashboard
+      - name: Checkout refreshed main branch
         uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
@@ -99,8 +102,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout source
+      - name: Checkout refreshed main branch
         uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
       - name: Stage source files without hidden paths
         run: |
           mkdir -p dist/Samsung_Electronics_DART_Agent/workflow_template
