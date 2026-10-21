@@ -94,3 +94,54 @@ jobs:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+  package-agent:
+    name: Build clean downloadable ZIP package
+    needs: refresh-data
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+      - name: Stage source files without hidden paths
+        run: |
+          mkdir -p dist/Samsung_Electronics_DART_Agent/workflow_template
+          cp README.md API_KEY_SETUP.md env.example requirements.txt dist/Samsung_Electronics_DART_Agent/
+          cp config/companies.json dist/Samsung_Electronics_DART_Agent/config_companies.json
+          mkdir -p dist/Samsung_Electronics_DART_Agent/scripts dist/Samsung_Electronics_DART_Agent/data dist/Samsung_Electronics_DART_Agent/docs
+          cp scripts/fetch_dart.py scripts/analyze.py scripts/build_dashboard.py scripts/validate_project.py dist/Samsung_Electronics_DART_Agent/scripts/
+          cp data/dart_financials.json data/financial_data.json dist/Samsung_Electronics_DART_Agent/data/
+          cp docs/index.html docs/data.json dist/Samsung_Electronics_DART_Agent/docs/
+          cp .github/workflows/update.yml dist/Samsung_Electronics_DART_Agent/workflow_template/update.yml
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          import zipfile
+          root = Path("dist/Samsung_Electronics_DART_Agent")
+          target = Path("dist/Samsung_Electronics_DART_Agent.zip")
+          files = sorted(p for p in root.rglob("*") if p.is_file())
+          if not files:
+              raise SystemExit("Agent package is empty.")
+          hidden = [str(p.relative_to(root)) for p in files if any(part.startswith(".") for part in p.relative_to(root).parts)]
+          if hidden:
+              raise SystemExit("Hidden files must not be present in ZIP: " + ", ".join(hidden))
+          with ZipFile(target, "w", ZIP_DEFLATED) as z:
+              for p in files:
+                  z.write(p, ("Samsung_Electronics_DART_Agent/" + str(p.relative_to(root))).replace("\\\\", "/"))
+          with ZipFile(target) as z:
+              bad = z.testzip()
+              if bad:
+                  raise SystemExit("ZIP integrity check failed: " + bad)
+              names = z.namelist()
+              if any(any(part.startswith(".") for part in Path(n).parts) for n in names):
+                  raise SystemExit("Hidden path detected in finished ZIP.")
+          print(f"Built {target} with {len(files)} files; hidden-path check PASS; bytes={target.stat().st_size}")
+          PY
+      - name: Upload clean agent ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Samsung_Electronics_DART_Agent
+          path: dist/Samsung_Electronics_DART_Agent.zip
+          if-no-files-found: error
+          retention-days: 30
