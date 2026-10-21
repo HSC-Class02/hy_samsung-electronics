@@ -131,6 +131,16 @@ def fetch_report(corp_code, year, report_code):
     if rows: return rows,"OFS"
     return [],None
 
+def pick_by_id(rows, account_ids, mode="period"):
+    """Fallback to stable XBRL/DART account identifiers when localized labels vary."""
+    ids=set(account_ids)
+    for row in rows:
+        if str(row.get("account_id","")).strip() in ids:
+            value=value_for(row,mode)
+            if value is not None:
+                return value
+    return None
+
 def extract(rows):
     bs=[r for r in rows if r.get("sj_div")=="BS"]
     pl=[r for r in rows if r.get("sj_div") in ("IS","CIS")]
@@ -168,9 +178,26 @@ def extract(rows):
       "capex_ppe":([r"유형자산의 취득",r"유형자산 취득"],cf),
       "capex_intangible":([r"무형자산의 취득",r"무형자산 취득"],cf),
     }
+    account_ids={
+      "revenue":["ifrs-full_Revenue","ifrs_Revenue","ifrs-full_RevenueFromContractsWithCustomers","dart_OperatingRevenue"],
+      "gross_profit":["ifrs-full_GrossProfit","ifrs_GrossProfit"],
+      "operating_income":["ifrs-full_ProfitLossFromOperatingActivities","dart_OperatingIncomeLoss"],
+      "pretax_income":["ifrs-full_ProfitLossBeforeTax","ifrs_ProfitLossBeforeTax"],
+      "net_income":["ifrs-full_ProfitLoss","ifrs_ProfitLoss","dart_ProfitLoss"],
+      "controlling_net_income":["ifrs-full_ProfitLossAttributableToOwnersOfParent","ifrs_ProfitLossAttributableToOwnersOfParent"],
+      "interest_expense":["ifrs-full_FinanceCosts","ifrs_FinanceCosts"],
+      "cfo":["ifrs-full_CashFlowsFromUsedInOperatingActivities","ifrs_CashFlowsFromUsedInOperatingActivities"],
+      "cfi":["ifrs-full_CashFlowsFromUsedInInvestingActivities","ifrs_CashFlowsFromUsedInInvestingActivities"],
+      "cff":["ifrs-full_CashFlowsFromUsedInFinancingActivities","ifrs_CashFlowsFromUsedInFinancingActivities"],
+    }
     for key,(regexes,group) in patterns.items():
         out[key]=pick(group,regexes,"period")
         out[key+"_ytd"]=pick(group,regexes,"ytd")
+        ids=account_ids.get(key,[])
+        if out[key] is None and ids:
+            out[key]=pick_by_id(rows,ids,"period")
+        if out[key+"_ytd"] is None and ids:
+            out[key+"_ytd"]=pick_by_id(rows,ids,"ytd")
         if out[key+"_ytd"] is None: out[key+"_ytd"]=out[key]
     # A few issuers present cost of sales but not gross profit.
     if out.get("gross_profit") is None and out.get("revenue") is not None:
@@ -240,6 +267,7 @@ def self_test():
     test=[{"account_nm":"매출액","thstrm_amount":"100","thstrm_add_amount":"300","sj_div":"IS"}]
     assert pick(test,[r"^매출액$"],"period")==100
     assert pick(test,[r"^매출액$"],"ytd")==300
+    assert pick_by_id([{"account_id":"ifrs-full_Revenue","thstrm_amount":"12"}],["ifrs-full_Revenue"])==12
     print("fetch_dart self-test PASS")
 
 if __name__=="__main__":
