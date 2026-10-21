@@ -153,11 +153,11 @@ def extract(rows):
     # Statement flows are retained both as the current reporting period and, where provided,
     # the year-to-date cumulative amount. This lets the analyzer derive standalone Q2 and Q4.
     patterns={
-      "revenue":([r"^매출액$",r"^수익\(매출액\)$",r"^영업수익$"],pl),
-      "gross_profit":([r"^매출총이익$"],pl),
-      "operating_income":([r"^영업이익$",r"^영업이익\(손실\)$"],pl),
+      "revenue":([r"^매출액",r"^수익\(매출액\)",r"^영업수익",r"^매출"],pl),
+      "gross_profit":([r"^매출총이익"],pl),
+      "operating_income":([r"^영업이익"],pl),
       "pretax_income":([r"^법인세비용차감전순이익$",r"^세전이익$"],pl),
-      "net_income":([r"^당기순이익$",r"^당기순이익\(손실\)$"],pl),
+      "net_income":([r"^당기순이익"],pl),
       "controlling_net_income":([r"지배기업의 소유주에게 귀속되는 당기순이익"],pl),
       "interest_expense":([r"^이자비용$",r"^금융원가$",r"^금융비용$"],pl),
       "depreciation":([r"감가상각비",r"감가상각"],pl),
