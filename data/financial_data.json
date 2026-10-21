@@ -8,7 +8,7 @@
     "market": "KOSPI",
     "currency": "KRW"
   },
-  "updated_at": "2026-10-21T15:46:41.490847+00:00",
+  "updated_at": "2026-10-21T16:04:24.766738+00:00",
   "data_start_year": 2015,
   "units": {
     "raw_amount": "KRW",
@@ -3648,10 +3648,10 @@
       "caveat": "패널 업황과 투자 사이클 영향이 큼",
       "url": "https://dart.fss.or.kr/dsab001/main.do?autoSearch=true&textCrpNm=034220",
       "year": 2025,
-      "revenue": 22433623000000.0,
+      "revenue": 25810082000000.0,
       "operating_income": 516977000000.0,
       "net_income": 303807000000.0,
-      "operating_margin": 0.023044739585754828,
+      "operating_margin": 0.020030040973910892,
       "roe": 0.03818578944441145,
       "roa": 0.010164803535905036,
       "roic": null,
