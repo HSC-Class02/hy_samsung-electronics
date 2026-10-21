@@ -163,7 +163,7 @@ def extract(rows):
     # Statement flows are retained both as the current reporting period and, where provided,
     # the year-to-date cumulative amount. This lets the analyzer derive standalone Q2 and Q4.
     patterns={
-      "revenue":([r"^매출액",r"^수익\(매출액\)",r"^영업수익",r"^매출"],pl),
+      "revenue":([r"^매출액",r"^수익\(매출액\)",r"^영업수익",r"^매출(?!원가|총이익|채권|채무)"],pl),
       "gross_profit":([r"^매출총이익"],pl),
       "operating_income":([r"^영업이익"],pl),
       "pretax_income":([r"^법인세비용차감전순이익$",r"^세전이익$"],pl),
@@ -267,6 +267,8 @@ def self_test():
     test=[{"account_nm":"매출액","thstrm_amount":"100","thstrm_add_amount":"300","sj_div":"IS"}]
     assert pick(test,[r"^매출액$"],"period")==100
     assert pick(test,[r"^매출액$"],"ytd")==300
+    cogs=[{"account_nm":"매출원가","thstrm_amount":"65","sj_div":"IS"}]
+    assert pick(cogs,[r"^매출액",r"^수익\(매출액\)",r"^영업수익",r"^매출(?!원가|총이익|채권|채무)"],"period") is None
     assert pick_by_id([{"account_id":"ifrs-full_Revenue","thstrm_amount":"12"}],["ifrs-full_Revenue"])==12
     print("fetch_dart self-test PASS")
 
