@@ -155,10 +155,14 @@ def run():
     records=[]
     year_max=datetime.now().year
     companies=[CONFIG["primary"]]+CONFIG["peers"]
+    primary_name=CONFIG["primary"]["name"]
     for company in companies:
         print(f"Collecting {company['name']} ({company['ticker']})")
+        # Full period history is needed to derive Q2/Q4 for Samsung Electronics.
+        # Peer firms need annual observations for the comparison table, reducing API volume.
+        reports_for_company=REPORT_CODES if company["name"]==primary_name else (("annual","11011"),)
         for year in range(YEAR_START,year_max+1):
-            for period,code in REPORT_CODES:
+            for period,code in reports_for_company:
                 try:
                     rows,fs=fetch_report(company["corp_code"],year,code)
                 except DartAPIError:
