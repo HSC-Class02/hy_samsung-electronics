@@ -16,7 +16,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: samsung-dart-financial-dashboard
+  group: samsung-dart-financial-dashboard-v2
   cancel-in-progress: true
 jobs:
   refresh-data:
@@ -81,9 +81,6 @@ jobs:
       contents: read
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout dashboard
         uses: actions/checkout@v6
