@@ -28,7 +28,7 @@
     },
     {
       "name": "삼성전기",
-      "corp_code": "00126138",
+      "corp_code": "00126371",
       "ticker": "009150.KS",
       "stock_code": "009150",
       "segment": "전자부품·기판·MLCC",
@@ -37,7 +37,7 @@
     },
     {
       "name": "LG디스플레이",
-      "corp_code": "00401730",
+      "corp_code": "00105873",
       "ticker": "034220.KS",
       "stock_code": "034220",
       "segment": "디스플레이 패널",
