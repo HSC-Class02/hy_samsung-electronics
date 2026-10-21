@@ -2,7 +2,7 @@
 
 [![🔗 대시보드 바로가기](https://img.shields.io/badge/🔗%20대시보드-바로가기-176B87?style=for-the-badge)](https://hsc-class02.github.io/hy_samsung-electronics/)
 
-삼성전자(005930)의 OpenDART 공시 재무제표를 수집하고, 핵심 재무수치·재무비율을 계산해 GitHub Pages 대시보드로 보여주는 프로젝트입니다. 2010년부터 수집을 시도하며, Annual / Half-year / Quarterly 재무표를 각각 독립적으로 표시합니다.
+삼성전자(005930)의 OpenDART 공시 재무제표를 수집하고, 핵심 재무수치·재무비율을 계산해 GitHub Pages 대시보드로 보여주는 프로젝트입니다. 2015년부터 수집하며, Annual / Half-year / Quarterly 재무표를 각각 독립적으로 표시합니다.
 
 ## Dashboard
 
