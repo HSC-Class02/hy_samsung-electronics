@@ -42,7 +42,7 @@ jobs:
         run: python scripts/analyze.py --self-test
       - name: Fetch annual, half-year, and quarterly DART reports
         env:
-          DART_API_KEY: \${{ secrets.DART_API_KEY }}
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
         run: python scripts/fetch_dart.py
       - name: Calculate financial ratios and derive standalone quarters
         run: python scripts/analyze.py
@@ -83,7 +83,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout dashboard
         uses: actions/checkout@v6
@@ -107,9 +107,9 @@ jobs:
       - name: Stage source files without hidden paths
         run: |
           mkdir -p dist/Samsung_Electronics_DART_Agent/workflow_template
+          mkdir -p dist/Samsung_Electronics_DART_Agent/config dist/Samsung_Electronics_DART_Agent/scripts dist/Samsung_Electronics_DART_Agent/data dist/Samsung_Electronics_DART_Agent/docs
           cp README.md API_KEY_SETUP.md env.example requirements.txt dist/Samsung_Electronics_DART_Agent/
           cp config/companies.json dist/Samsung_Electronics_DART_Agent/config/companies.json
-          mkdir -p dist/Samsung_Electronics_DART_Agent/config dist/Samsung_Electronics_DART_Agent/scripts dist/Samsung_Electronics_DART_Agent/data dist/Samsung_Electronics_DART_Agent/docs
           cp scripts/fetch_dart.py scripts/analyze.py scripts/build_dashboard.py scripts/validate_project.py dist/Samsung_Electronics_DART_Agent/scripts/
           cp data/dart_financials.json data/financial_data.json dist/Samsung_Electronics_DART_Agent/data/
           cp docs/index.html docs/data.json dist/Samsung_Electronics_DART_Agent/docs/
