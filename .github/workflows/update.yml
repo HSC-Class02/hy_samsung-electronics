@@ -68,6 +68,9 @@ jobs:
           git add data docs
           if ! git diff --cached --quiet; then
             git commit -m "Update Samsung Electronics DART financial data"
+            git fetch origin main
+            git checkout -B automation-data-update
+            git rebase origin/main
             git push origin HEAD:main
           else
             echo "No generated data changes."
